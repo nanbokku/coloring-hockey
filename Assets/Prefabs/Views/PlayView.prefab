@@ -326,6 +326,8 @@ GameObject:
   - component: {fileID: 4665357487294577089}
   - component: {fileID: 7252060144794704815}
   - component: {fileID: 7036238010762848308}
+  - component: {fileID: 225367690}
+  - component: {fileID: 225367691}
   m_Layer: 5
   m_Name: InstantScore
   m_TagString: Untagged
@@ -392,6 +394,42 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+--- !u!95 &225367690
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3624915682450684992}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a3d55b885ad41b240916678a2341363b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &225367691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3624915682450684992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4f645eaeb98eb74c87ba8e52de62da3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerScoreTxt: {fileID: 849941374331029433}
+  enemyScoreTxt: {fileID: 2031491610127242848}
+  instantScoreAnimator: {fileID: 225367690}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  addedScoreColor: {r: 1, g: 0.60828614, b: 0, a: 1}
 --- !u!1 &3859556735422009243
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,7 +606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3790077752448958915
 RectTransform:
   m_ObjectHideFlags: 0
@@ -663,6 +701,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 836d47c7d9e2fac4eb2b810593a504f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerScoreTxt: {fileID: 4662607887040598386}
+  enemyScoreTxt: {fileID: 8702679393442107596}
+  instantScore: {fileID: 225367691}
 --- !u!1 &6355649086067871430
 GameObject:
   m_ObjectHideFlags: 0
