@@ -25,7 +25,7 @@ namespace MonoBehaviourUtility
 
         protected virtual void Awake()
         {
-            if (Instance == this)
+            if (Instance != this)
             {
                 Destroy(this);
                 return;

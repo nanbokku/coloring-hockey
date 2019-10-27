@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class InGameUIController : MonoBehaviour
 {
@@ -8,14 +8,30 @@ public class InGameUIController : MonoBehaviour
     [SerializeField]
     private PlayView playView = null;
 
-    public void Initialize()
+    public UnityAction OnCountdownFinished { get; set; } = null;
+    public UnityAction OnScoreUpdated { get; set; } = null;
+
+    public void CountdownView()
     {
         countdownView.OnStartAnimFinished = () =>
         {
-            // TODO: スタート表示が終了，PlayViewの表示
-            Debug.Log("finish start");
+            OnCountdownFinished();
         };
 
         countdownView.gameObject.SetActive(true);
+        playView.gameObject.SetActive(false);
+    }
+
+    public void PlayView()
+    {
+        playView.OnScoreUpdated = () =>
+        {
+            // TODO: スコア更新アニメーション終了，リスタート
+            Debug.Log("score updated");
+            OnScoreUpdated();
+        };
+
+        countdownView.gameObject.SetActive(false);
+        playView.gameObject.SetActive(true);
     }
 }

@@ -2,6 +2,9 @@
 
 public abstract class GameStateBase
 {
+    public GameStateBase(InGameUIController uIController)
+    { }
+
     public UnityAction<GameStateBase> OnStateChanged { get; set; }
 
     public abstract void Enter();

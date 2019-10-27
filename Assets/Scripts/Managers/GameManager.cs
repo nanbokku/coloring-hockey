@@ -7,12 +7,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     void Start()
     {
-        
+        ChangeSceneState(new GSS_InGame());
     }
 
     void Update()
     {
+        if (currentState == null) return;
 
+        currentState.Update();
     }
 
     void ChangeSceneState(GameSceneStateBase next)
@@ -23,6 +25,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             currentState.OnStateChanged = null;
         }
 
+        currentState = next;
         currentState.OnStateChanged = (state) =>
         {
             ChangeSceneState(state);
