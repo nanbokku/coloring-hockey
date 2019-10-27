@@ -7,7 +7,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     void Start()
     {
-
+        
     }
 
     void Update()
