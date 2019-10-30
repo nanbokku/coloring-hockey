@@ -2,7 +2,8 @@
 
 public class GS_Play : GameStateBase
 {
-    private InGameUIController inGameUiController;
+    private InGameUIController inGameUiController = null;
+    private GoalArea[] goalAreas = null;
 
     public GS_Play(InGameUIController uIController) : base(uIController)
     {
@@ -11,6 +12,16 @@ public class GS_Play : GameStateBase
 
     public override void Enter()
     {
+        goalAreas = MonoBehaviour.FindObjectsOfType<GoalArea>();
+
+        foreach (GoalArea area in goalAreas)
+        {
+            area.OnGoaled = (type) =>
+            {
+                ScoreStore.Instance.IncrementPoint(type);
+            };
+        }
+
         inGameUiController.OnScoreUpdated = () =>
         {
             // TODO: スコアが更新されたらリスタート

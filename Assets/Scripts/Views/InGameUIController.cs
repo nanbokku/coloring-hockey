@@ -24,6 +24,19 @@ public class InGameUIController : MonoBehaviour
 
     public void PlayView()
     {
+        // ScoreStoreが更新されたらviewも更新
+        ScoreStore.Instance.OnPointIncremented = (type) =>
+        {
+            if (type == PlayerType.Human)
+            {
+                playView.UpdatePlayerScore(ScoreStore.Instance.GetScore(type));
+            }
+            else
+            {
+                playView.UpdateEnemyScore(ScoreStore.Instance.GetScore(type));
+            }
+        };
+
         playView.OnScoreUpdated = () =>
         {
             // TODO: スコア更新アニメーション終了，リスタート
