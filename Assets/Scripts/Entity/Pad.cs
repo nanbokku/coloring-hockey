@@ -36,15 +36,15 @@ public class Pad : MonoBehaviour
         Vector3 floorPosition = StageData.FloorPosition;
         floorPosition.y = positionY;
 
+        // Z座標を制限する
+        float min = Mathf.Max(minZ, StageData.FloorPosition.z - floorCenterOffset);
+        float max = Mathf.Min(maxZ, StageData.FloorPosition.z + floorCenterOffset);
+        position.z = Mathf.Clamp(position.z, min, max);
+
         // floorの外にpadが出た場合の処理
         float distance = (position - floorPosition).magnitude;
         if (distance > floorCenterOffset)
         {
-            // Z座標を制限する
-            float min = Mathf.Max(minZ, StageData.FloorPosition.z - floorCenterOffset);
-            float max = Mathf.Min(maxZ, StageData.FloorPosition.z + floorCenterOffset);
-            position.z = Mathf.Clamp(position.z, min, max);
-
             float sin = position.z / floorCenterOffset;
             float theta = Mathf.Asin(sin);
 
