@@ -8,6 +8,17 @@ public class PadController : MonoBehaviour
     private Pad pad = null;
 
     private Vector3 destination = Vector3.zero;
+    private bool isActive = false;
+
+    public void ResetGame()
+    {
+        this.transform.position = PlayerData.HumanInitPosition;
+    }
+
+    public void SetActiveOperation(bool active)
+    {
+        isActive = active;
+    }
 
     void Awake()
     {
@@ -16,6 +27,8 @@ public class PadController : MonoBehaviour
 
     void Update()
     {
+        if (!isActive) return;
+
         // マウスのワールド座標を取得
         Vector3 position = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.transform.position.y));
 
@@ -24,6 +37,8 @@ public class PadController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!isActive) return;
+
         pad.MovePosition(destination);
     }
 }

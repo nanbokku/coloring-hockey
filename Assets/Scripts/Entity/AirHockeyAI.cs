@@ -8,6 +8,8 @@ public class AirHockeyAI : MonoBehaviour
     private Pad pad = null;
     private IHockeyStrategy strategy = null;
     private Vector3 destination = Vector3.zero;
+    private Transform puck = null;
+    private bool isActive = false;
 
     void Awake()
     {
@@ -19,20 +21,31 @@ public class AirHockeyAI : MonoBehaviour
         this.strategy = strategy;
     }
 
+    public void ResetGame(GameObject puck)
+    {
+        this.transform.position = PlayerData.AiInitPosition;
+        this.puck = puck.transform;
+    }
+
+    public void SetActiveOperation(bool active)
+    {
+        isActive = active;
+    }
+
     void Update()
     {
+        if (!isActive) return;
         if (strategy == null) return;
 
-        // TODO: 取得方法は？
-        Vector3 puckPosition = GameObject.FindGameObjectWithTag("Puck").transform.position;
-
-        destination = strategy.GetDestination(pad, puckPosition);
+        destination = strategy.GetDestination(pad, puck.position);
 
         destination = pad.RestrictDestination(StageData.FloorPosition.z + pad.Radius, StageData.FloorPosition.z + StageData.FloorRadius, destination);
     }
 
     void FixedUpdate()
     {
+        if (!isActive) return;
+
         pad.MovePosition(destination);
     }
 }

@@ -39,8 +39,6 @@ public class InGameUIController : MonoBehaviour
 
         playView.OnScoreUpdated = () =>
         {
-            // TODO: スコア更新アニメーション終了，リスタート
-            Debug.Log("score updated");
             OnScoreUpdated();
         };
 
