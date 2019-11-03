@@ -4,6 +4,8 @@ public class DynamicPaint : MonoBehaviour
 {
     [SerializeField]
     private Renderer paintRenderer = null;
+    [SerializeField]
+    private Collider paintCollider = null;
     private MaterialPropertyBlock materialBlock = null;
 
     private Vector4[] drawWorldPosition1 = new Vector4[1000];
@@ -26,6 +28,11 @@ public class DynamicPaint : MonoBehaviour
         materialBlock = new MaterialPropertyBlock();
 
         Clear();
+    }
+
+    public Vector3 ClosestPoint(Vector3 position)
+    {
+        return paintCollider.ClosestPoint(position);
     }
 
     public void AddDrawPoint(Vector3 point, PlayerType type)
@@ -54,8 +61,8 @@ public class DynamicPaint : MonoBehaviour
 
     public void Clear()
     {
-        drawWorldPosition1 = new Vector4[1000];
-        drawWorldPosition2 = new Vector4[1000];
+        drawWorldPosition1 = new Vector4[2000];
+        drawWorldPosition2 = new Vector4[2000];
         currentWorldPosition1 = 0;
         currentWorldPosition2 = 0;
 

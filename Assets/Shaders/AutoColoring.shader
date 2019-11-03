@@ -8,7 +8,6 @@
         _Color2 ("Color2", Color) = (1, 1, 1, 1)
         _DefaultColor ("DefaultColor", Color) = (1, 1, 1, 1)
         _Radius ("Radius", Float) = 1.0
-        _Scale ("Scale", Vector) = (1, 1, 1)
     }
     SubShader
     {
@@ -34,7 +33,7 @@
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float4 color : COLOR;
+                float4 worldPos : TEXCOORD1;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
@@ -45,15 +44,14 @@
             float4 _Color2;
             float4 _DefaultColor;
             half _Radius;
-            half _Scale;    // TODO: scaleを考慮して距離計算する
-            float4 _DrawWorldPosition1[1000];
-            float4 _DrawWorldPosition2[1000];
+            float4 _DrawWorldPosition1[2000];
+            float4 _DrawWorldPosition2[2000];
             int _CurrentWorldPosition1;
             int _CurrentWorldPosition2;
             float4 _MainTex_ST;
             float4 _DefaultTex_ST;
 
-            int findIndex(float4 worldPosAry[1000], int currentPos, float4 worldPos)
+            int findIndex(float4 worldPosAry[2000], int currentPos, float4 worldPos)
             {
                 for(int i=0; i<currentPos; i++) {
                     half dist = distance(worldPosAry[i].xyz, worldPos.xyz);
@@ -77,39 +75,33 @@
                 float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
                 worldPos /= worldPos.w;
 
-                int index1 = findIndex(_DrawWorldPosition1, _CurrentWorldPosition1, worldPos);
-                int index2 = findIndex(_DrawWorldPosition2, _CurrentWorldPosition2, worldPos);
+                o.worldPos = worldPos;
+                o.uv = v.uv;
 
-                if (index1 < 0 && index2 < 0) {
-                    // 上塗りしない場合
-                    o.uv = TRANSFORM_TEX(v.uv, _DefaultTex);
-                    o.color = _DefaultColor;
-                } else if (index1 > index2) {
-                    // _MainTex1が上になる
-                    o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                    o.color = _Color1;
-                } else {
-                    // _MainTex2が上になる
-                    o.uv = TRANSFORM_TEX(v.uv, _MainTex);  
-                    o.color = _Color2;
-                }
-
-                // o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col;
-                if (equals(i.color, _DefaultColor)) {
-                    col = _DefaultColor * tex2D(_DefaultTex, i.uv);
+                int index1 = findIndex(_DrawWorldPosition1, _CurrentWorldPosition1, i.worldPos);
+                int index2 = findIndex(_DrawWorldPosition2, _CurrentWorldPosition2, i.worldPos);
+
+                fixed4 col = fixed4(0, 0, 0, 0);
+                if (index1 < 0 && index2 < 0) {
+                    // 上塗りしない場合
+                    float2 uv = TRANSFORM_TEX(i.uv, _DefaultTex);
+                    col = _DefaultColor * tex2D(_DefaultTex, uv);
+                } else if (index1 > index2) {
+                    // _MainTex1が上になる
+                    float2 uv = TRANSFORM_TEX(i.uv, _MainTex);
+                    col = _Color1 * tex2D(_MainTex, uv);
                 } else {
-                    col = i.color * tex2D(_MainTex, i.uv);
+                    // _MainTex2が上になる
+                    float2 uv = TRANSFORM_TEX(i.uv, _MainTex);  
+                    col = _Color2 * tex2D(_MainTex, uv);
                 }
                 
-                // // sample the texture
-                // fixed4 col = tex2D(_MainTex, i.uv);
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

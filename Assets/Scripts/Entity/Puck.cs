@@ -12,10 +12,24 @@ public class Puck : MonoBehaviour
     private Vector3 lastPosition = Vector3.zero;
 
     private float velocity = 0;
+    private DynamicPaint paint = null;
+    private int layerMask = 0;
+
+    void Awake()
+    {
+        paint = FindObjectOfType<DynamicPaint>();
+        layerMask = 1 << LayerMask.NameToLayer("Floor");
+    }
 
     void Start()
     {
         lastPosition = this.transform.position;
+    }
+
+    void Update()
+    {
+        // TODO: 通った道筋に色塗り（最後に触れたプレイヤーの色）
+        paint.AddDrawPoint(paint.ClosestPoint(this.transform.position), PlayerType.Human);
     }
 
     // void FixedUpdate()

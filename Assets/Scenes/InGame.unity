@@ -193,7 +193,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1206
+  m_Name: pb_Mesh-1204
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -514,13 +514,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   paintRenderer: {fileID: 172567913}
+  paintCollider: {fileID: 1205278170}
+--- !u!65 &1205278170 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 3163153399827712566, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
+    type: 3}
+  m_PrefabInstance: {fileID: 3163153399919186141}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &2019409490
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1200
+  m_Name: pb_Mesh-1198
   serializedVersion: 9
   m_SubMeshes:
   - serializedVersion: 2
@@ -824,6 +831,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Environments
       objectReference: {fileID: 0}
+    - target: {fileID: 3163153399827712561, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d93547219d452b74baa66b80633dfade, type: 2}
     - target: {fileID: 3163153400327730091, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -889,11 +901,6 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 217866136}
-    - target: {fileID: 3163153399827712561, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: d93547219d452b74baa66b80633dfade, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f67e86bc8e0b924ead0b3a53aacb03a, type: 3}
 --- !u!1001 &4305255284894371197

@@ -12,7 +12,6 @@ public class Pad : MonoBehaviour
 
     private float positionY = 0;
     private float floorCenterOffset = 0;
-    private DynamicPaint paint = null;
 
     void Awake()
     {
@@ -22,23 +21,11 @@ public class Pad : MonoBehaviour
 
         Radius = meshFilter.mesh.bounds.size.x * transform.localScale.x / 2.0f;
         floorCenterOffset = StageData.FloorRadius - Radius;
-
-        paint = FindObjectOfType<DynamicPaint>();
     }
 
     public void MovePosition(Vector3 destination)
     {
         this.rigidBody.MovePosition(destination);
-
-        int layerMask = 1 << LayerMask.NameToLayer("Floor");
-        Ray ray = new Ray(Camera.main.transform.position, this.transform.position - Camera.main.transform.position);
-        RaycastHit hit;
-        bool isHit = Physics.Raycast(ray.origin, ray.direction, out hit, 500, layerMask);
-
-        if (isHit)
-        {
-            paint.AddDrawPoint(hit.point, PlayerType.Ai);
-        }
     }
 
     public Vector3 RestrictDestination(float minZ, float maxZ, Vector3 position)
