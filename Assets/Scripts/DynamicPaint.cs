@@ -48,19 +48,19 @@ public class DynamicPaint : MonoBehaviour
 
         if (type == PlayerType.Human)
         {
-            point4.w = 0;
+            point4.w = 1;
         }
         else if (type == PlayerType.Ai)
         {
-            point4.w = 1;
+            point4.w = 2;
+        }
+        else
+        {
+            // default color
+            point4.w = 0;
         }
 
         drawWorldPositionsAndColorNumbers[currentIndex] = point4;
-
-        if (++currentIndex >= 1023)
-        {
-            currentIndex = 0;
-        }
 
         if (positionAndColorAryLength < 1023) positionAndColorAryLength++;
 
@@ -69,6 +69,11 @@ public class DynamicPaint : MonoBehaviour
         materialBlock.SetInt(positionAndColorAryLengthId, positionAndColorAryLength);
 
         paintRenderer.SetPropertyBlock(materialBlock);
+
+        if (++currentIndex >= 1023)
+        {
+            currentIndex = 0;
+        }
     }
 
     public void Clear()

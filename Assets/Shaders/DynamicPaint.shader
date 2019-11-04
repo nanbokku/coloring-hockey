@@ -68,12 +68,15 @@
                     return 0;
                 }
 
-                if (_DrawWorldPositionsAndColorNumbers[i].w == 0) {
+                if (_DrawWorldPositionsAndColorNumbers[i].w == 1) {
                     // Color1
                     return 1;
-                } else {
+                } else if (_DrawWorldPositionsAndColorNumbers[i].w == 2) {
                     // Color2
                     return 2;
+                } else {
+                    // DefaultColor
+                    return 0;
                 }
             }
 

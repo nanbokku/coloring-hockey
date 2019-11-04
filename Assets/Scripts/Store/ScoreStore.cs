@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 public enum PlayerType
 {
-    Human, Ai
+    Human, Ai, None
 }
 
 public class ScoreStore

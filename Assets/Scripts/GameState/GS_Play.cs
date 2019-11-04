@@ -70,5 +70,7 @@ public class GS_Play : GameStateBase
 
         ai.SetActiveOperation(true);
         player.SetActiveOperation(true);
+
+        DynamicPaintManager.Instance.Clear();
     }
 }

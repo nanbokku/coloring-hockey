@@ -181,12 +181,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!23 &172567913 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3163153399827712561, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
-    type: 3}
-  m_PrefabInstance: {fileID: 3163153399919186141}
-  m_PrefabAsset: {fileID: 0}
 --- !u!43 &217866136
 Mesh:
   m_ObjectHideFlags: 0
@@ -449,7 +443,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.16887684, g: 0.35634714, b: 0.6509434, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -495,31 +489,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!1 &604058884 stripped
+--- !u!1 &1466178995 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 3163153400327730088, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
+  m_CorrespondingSourceObject: {fileID: 4746415005764359644, guid: e00b0152a1e4f7b4b8ecb86ee904e334,
     type: 3}
-  m_PrefabInstance: {fileID: 3163153399919186141}
+  m_PrefabInstance: {fileID: 2156859516732717576}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &604058886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604058884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b6385e0f83ef214f8b87762f03b1918, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  paintRenderer: {fileID: 172567913}
-  paintCollider: {fileID: 1205278170}
---- !u!65 &1205278170 stripped
-BoxCollider:
-  m_CorrespondingSourceObject: {fileID: 3163153399827712566, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
+--- !u!1 &1706629174 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8180344484394884486, guid: 32ddd730f2d32dc418f89102759befd9,
     type: 3}
-  m_PrefabInstance: {fileID: 3163153399919186141}
+  m_PrefabInstance: {fileID: 7534789934859390902}
   m_PrefabAsset: {fileID: 0}
 --- !u!43 &2019409490
 Mesh:
@@ -831,11 +811,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Environments
       objectReference: {fileID: 0}
-    - target: {fileID: 3163153399827712561, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: d93547219d452b74baa66b80633dfade, type: 2}
     - target: {fileID: 3163153400327730091, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -901,6 +876,14 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 217866136}
+    - target: {fileID: 604058885, guid: 2f67e86bc8e0b924ead0b3a53aacb03a, type: 3}
+      propertyPath: humanPadObj
+      value: 
+      objectReference: {fileID: 1466178995}
+    - target: {fileID: 604058885, guid: 2f67e86bc8e0b924ead0b3a53aacb03a, type: 3}
+      propertyPath: aiPadObj
+      value: 
+      objectReference: {fileID: 1706629174}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f67e86bc8e0b924ead0b3a53aacb03a, type: 3}
 --- !u!1001 &4305255284894371197

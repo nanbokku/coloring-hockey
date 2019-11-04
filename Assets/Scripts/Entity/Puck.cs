@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Constants;
 
 public class Puck : MonoBehaviour
 {
@@ -10,26 +11,29 @@ public class Puck : MonoBehaviour
     // TODO: rigidbodyで動きを実装するとすり抜けがはげしかったりする
 
     private Vector3 lastPosition = Vector3.zero;
-
     private float velocity = 0;
-    private DynamicPaint paint = null;
-    private int layerMask = 0;
-
-    void Awake()
-    {
-        paint = FindObjectOfType<DynamicPaint>();
-        layerMask = 1 << LayerMask.NameToLayer("Floor");
-    }
+    private PlayerType lastPlayer = PlayerType.None;
 
     void Start()
     {
         lastPosition = this.transform.position;
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        // TODO: 通った道筋に色塗り（最後に触れたプレイヤーの色）
-        paint.AddDrawPoint(paint.ClosestPoint(this.transform.position), PlayerType.Human);
+        DynamicPaintManager.Instance.AddDrawPoint(this.transform.position, this.lastPlayer);
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag != StageData.TagNameOfPad) return;
+
+        DynamicPaintManager.Instance.ChangeColor(other.gameObject, this);
+    }
+
+    public void UpdateLastCollisionPlayer(PlayerType type)
+    {
+        this.lastPlayer = type;
     }
 
     // void FixedUpdate()
