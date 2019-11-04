@@ -1,4 +1,4 @@
-﻿Shader "Unlit/AutoColoring"
+﻿Shader "Custom/DynamicPaint"
 {
     Properties
     {
@@ -34,7 +34,7 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 worldPos : TEXCOORD1;
-                UNITY_FOG_COORDS(1)
+                UNITY_FOG_COORDS(2)
                 float4 vertex : SV_POSITION;
             };
 
@@ -44,25 +44,37 @@
             float4 _Color2;
             float4 _DefaultColor;
             half _Radius;
-            float4 _DrawWorldPosition1[2000];
-            float4 _DrawWorldPosition2[2000];
-            int _CurrentWorldPosition1;
-            int _CurrentWorldPosition2;
+            // ワールド座標(xyz)とカラーナンバー(w)
+            float4 _DrawWorldPositionsAndColorNumbers[1023];
+            int _CurrentIndex;
+            int _PositionAndColorAryLength;
             float4 _MainTex_ST;
             float4 _DefaultTex_ST;
 
-            int findIndex(float4 worldPosAry[2000], int currentPos, float4 worldPos)
+            int calcColorMode(float4 worldPos)
             {
-                for(int i=0; i<currentPos; i++) {
-                    half dist = distance(worldPosAry[i].xyz, worldPos.xyz);
-                    if (dist < _Radius) return i;
+                int i=0, count=0;
+                for(count = 0; count < _PositionAndColorAryLength; count++) {
+                    i = _CurrentIndex - count;
+                    if (i < 0) i = 1023 + i;
+
+                    half dist = distance(_DrawWorldPositionsAndColorNumbers[i].xyz, worldPos.xyz);
+
+                    if (dist < _Radius) break;
                 }
 
-                return -1;
-            }
+                // 見つからなかった場合はDefaultColor
+                if (_PositionAndColorAryLength == 0 || count >= _PositionAndColorAryLength) {
+                    return 0;
+                }
 
-            bool equals(float4 a, float4 b) {
-                return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+                if (_DrawWorldPositionsAndColorNumbers[i].w == 0) {
+                    // Color1
+                    return 1;
+                } else {
+                    // Color2
+                    return 2;
+                }
             }
 
             v2f vert (appdata v)
@@ -84,15 +96,14 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-                int index1 = findIndex(_DrawWorldPosition1, _CurrentWorldPosition1, i.worldPos);
-                int index2 = findIndex(_DrawWorldPosition2, _CurrentWorldPosition2, i.worldPos);
+                int mode = calcColorMode(i.worldPos);
 
                 fixed4 col = fixed4(0, 0, 0, 0);
-                if (index1 < 0 && index2 < 0) {
+                if (mode == 0) {
                     // 上塗りしない場合
                     float2 uv = TRANSFORM_TEX(i.uv, _DefaultTex);
                     col = _DefaultColor * tex2D(_DefaultTex, uv);
-                } else if (index1 > index2) {
+                } else if (mode == 1) {
                     // _MainTex1が上になる
                     float2 uv = TRANSFORM_TEX(i.uv, _MainTex);
                     col = _Color1 * tex2D(_MainTex, uv);
@@ -101,7 +112,7 @@
                     float2 uv = TRANSFORM_TEX(i.uv, _MainTex);  
                     col = _Color2 * tex2D(_MainTex, uv);
                 }
-                
+
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

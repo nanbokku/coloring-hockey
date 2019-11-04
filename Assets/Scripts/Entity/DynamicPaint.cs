@@ -8,22 +8,29 @@ public class DynamicPaint : MonoBehaviour
     private Collider paintCollider = null;
     private MaterialPropertyBlock materialBlock = null;
 
-    private Vector4[] drawWorldPosition1 = new Vector4[1000];
-    private Vector4[] drawWorldPosition2 = new Vector4[1000];
-    private int currentWorldPosition1 = 0;
-    private int currentWorldPosition2 = 0;
+    /// <summary>
+    /// ワールド座標(xyz)とカラーナンバー(w)を格納する配列
+    /// </summary>
+    private Vector4[] drawWorldPositionsAndColorNumbers = new Vector4[1023];
+    /// <summary>
+    /// drawWorldPositionAndColorNumbersにおける現在のインデックス
+    /// </summary>
+    private int currentIndex = 0;
+    /// <summary>
+    /// drawWorldpositionsAndColorNumbersの長さ
+    /// </summary>
+    private int positionAndColorAryLength = 0;
 
-    private int drawWorldPosition1Id = 0;
-    private int drawWorldPosition2Id = 0;
-    private int currentWorldPosition1Id = 0;
-    private int currentWorldPosition2Id = 0;
+    // shader property id
+    private int drawWorldPositionsAndColorNumbersId = 0;
+    private int currentIndexId = 0;
+    private int positionAndColorAryLengthId = 0;
 
     void Awake()
     {
-        drawWorldPosition1Id = Shader.PropertyToID("_DrawWorldPosition1");
-        drawWorldPosition2Id = Shader.PropertyToID("_DrawWorldPosition2");
-        currentWorldPosition1Id = Shader.PropertyToID("_CurrentWorldPosition1");
-        currentWorldPosition2Id = Shader.PropertyToID("_CurrentWorldPosition2");
+        drawWorldPositionsAndColorNumbersId = Shader.PropertyToID("_DrawWorldPositionsAndColorNumbers");
+        currentIndexId = Shader.PropertyToID("_CurrentIndex");
+        positionAndColorAryLengthId = Shader.PropertyToID("_PositionAndColorAryLength");
 
         materialBlock = new MaterialPropertyBlock();
 
@@ -41,35 +48,38 @@ public class DynamicPaint : MonoBehaviour
 
         if (type == PlayerType.Human)
         {
-            drawWorldPosition1[currentWorldPosition1] = point4;
-            currentWorldPosition1++;
-
-            materialBlock.SetVectorArray(drawWorldPosition1Id, drawWorldPosition1);
-            materialBlock.SetInt(currentWorldPosition1Id, currentWorldPosition1);
+            point4.w = 0;
         }
         else if (type == PlayerType.Ai)
         {
-            drawWorldPosition2[currentWorldPosition2] = point4;
-            currentWorldPosition2++;
-
-            materialBlock.SetVectorArray(drawWorldPosition2Id, drawWorldPosition2);
-            materialBlock.SetInt(currentWorldPosition2Id, currentWorldPosition2);
+            point4.w = 1;
         }
+
+        drawWorldPositionsAndColorNumbers[currentIndex] = point4;
+
+        if (++currentIndex >= 1023)
+        {
+            currentIndex = 0;
+        }
+
+        if (positionAndColorAryLength < 1023) positionAndColorAryLength++;
+
+        materialBlock.SetVectorArray(drawWorldPositionsAndColorNumbersId, drawWorldPositionsAndColorNumbers);
+        materialBlock.SetInt(currentIndexId, currentIndex);
+        materialBlock.SetInt(positionAndColorAryLengthId, positionAndColorAryLength);
 
         paintRenderer.SetPropertyBlock(materialBlock);
     }
 
     public void Clear()
     {
-        drawWorldPosition1 = new Vector4[2000];
-        drawWorldPosition2 = new Vector4[2000];
-        currentWorldPosition1 = 0;
-        currentWorldPosition2 = 0;
+        drawWorldPositionsAndColorNumbers = new Vector4[1023];
+        currentIndex = 0;
+        positionAndColorAryLength = 0;
 
-        materialBlock.SetVectorArray(drawWorldPosition1Id, drawWorldPosition1);
-        materialBlock.SetVectorArray(drawWorldPosition2Id, drawWorldPosition2);
-        materialBlock.SetInt(currentWorldPosition1Id, currentWorldPosition1);
-        materialBlock.SetInt(currentWorldPosition2Id, currentWorldPosition2);
+        materialBlock.SetVectorArray(drawWorldPositionsAndColorNumbersId, drawWorldPositionsAndColorNumbers);
+        materialBlock.SetInt(currentIndexId, currentIndex);
+        materialBlock.SetInt(positionAndColorAryLengthId, positionAndColorAryLength);
 
         paintRenderer.SetPropertyBlock(materialBlock);
     }
