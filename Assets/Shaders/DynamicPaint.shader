@@ -68,16 +68,7 @@
                     return 0;
                 }
 
-                if (_DrawWorldPositionsAndColorNumbers[i].w == 1) {
-                    // Color1
-                    return 1;
-                } else if (_DrawWorldPositionsAndColorNumbers[i].w == 2) {
-                    // Color2
-                    return 2;
-                } else {
-                    // DefaultColor
-                    return 0;
-                }
+                return _DrawWorldPositionsAndColorNumbers[i].w;
             }
 
             v2f vert (appdata v)

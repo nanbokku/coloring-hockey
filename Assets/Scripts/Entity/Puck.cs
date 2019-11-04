@@ -7,12 +7,15 @@ public class Puck : MonoBehaviour
     private float restitution = 0;  // TODO: Wallの変数にするべき
     [SerializeField]
     private SphereCollider sphereCollider = null;
+    [SerializeField]
+    private Rigidbody rigidBody = null;
 
     // TODO: rigidbodyで動きを実装するとすり抜けがはげしかったりする
 
     private Vector3 lastPosition = Vector3.zero;
     private float velocity = 0;
     private PlayerType lastPlayer = PlayerType.None;
+    private bool canDraw = false;
 
     void Start()
     {
@@ -21,7 +24,21 @@ public class Puck : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!canDraw) return;
+
         DynamicPaintManager.Instance.AddDrawPoint(this.transform.position, this.lastPlayer);
+    }
+
+    void OnEnable()
+    {
+        canDraw = true;
+    }
+
+    void OnDisable()
+    {
+        canDraw = false;
+        UpdateLastCollisionPlayer(PlayerType.None);
+        rigidBody.velocity = Vector3.zero;
     }
 
     void OnCollisionEnter(Collision other)

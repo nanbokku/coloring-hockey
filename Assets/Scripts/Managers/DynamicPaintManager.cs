@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using MonoBehaviourUtility;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(DynamicPaintManager))]
 public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
@@ -22,7 +23,6 @@ public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
     private GameObject humanPadObj = null;
     [SerializeField]
     private GameObject aiPadObj = null;
-
 
     public void AddDrawPoint(Vector3 point, PlayerType type)
     {
@@ -60,8 +60,13 @@ public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
         }
     }
 
-    public void ComputeColorRatio()
+    /// <summary>
+    /// 色の割合を計算
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="callback">結果を受け取るコールバック</param>
+    public void ComputeColorRatio(PlayerType type, UnityAction<float> callback)
     {
-        // 色の割合を計算
+        paint.ComputeColorRatio(type, callback);
     }
 }

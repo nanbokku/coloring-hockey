@@ -29,6 +29,10 @@ public class GS_Play : GameStateBase
                 player.SetActiveOperation(false);
 
                 ScoreStore.Instance.IncrementPoint(type);
+                DynamicPaintManager.Instance.ComputeColorRatio(type, (ratio) =>
+                {
+                    Debug.Log(ratio);
+                });
             };
         }
 

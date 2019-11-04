@@ -876,11 +876,13 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 217866136}
-    - target: {fileID: 604058885, guid: 2f67e86bc8e0b924ead0b3a53aacb03a, type: 3}
+    - target: {fileID: 8652755294799807979, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
+        type: 3}
       propertyPath: humanPadObj
       value: 
       objectReference: {fileID: 1466178995}
-    - target: {fileID: 604058885, guid: 2f67e86bc8e0b924ead0b3a53aacb03a, type: 3}
+    - target: {fileID: 8652755294799807979, guid: 2f67e86bc8e0b924ead0b3a53aacb03a,
+        type: 3}
       propertyPath: aiPadObj
       value: 
       objectReference: {fileID: 1706629174}
