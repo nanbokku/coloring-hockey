@@ -18,6 +18,11 @@ public class PadController : MonoBehaviour
     public void SetActiveOperation(bool active)
     {
         isActive = active;
+
+        if (isActive == false)
+        {
+            pad.StopMovement();
+        }
     }
 
     void Awake()

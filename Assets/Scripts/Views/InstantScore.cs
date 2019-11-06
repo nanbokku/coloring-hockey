@@ -15,6 +15,8 @@ public class InstantScore : MonoBehaviour
     private Color defaultColor = Color.white;
     [SerializeField]
     private Color addedScoreColor = default;
+    [SerializeField]
+    private TextMeshProUGUI multTxt = null;
 
     public UnityAction OnScoreAnimFinished { get; set; } = null;
 
@@ -29,6 +31,9 @@ public class InstantScore : MonoBehaviour
 
     public void UpdatePlayerScore(int score)
     {
+        int preScore = System.Convert.ToInt32(playerScoreTxt.text);
+        float ratio = (score - preScore) / 10.0f;
+        multTxt.text = "×" + ratio;
         playerScoreTxt.text = score.ToString();
         playerScoreTxt.color = addedScoreColor;
         enemyScoreTxt.color = defaultColor;
@@ -37,6 +42,9 @@ public class InstantScore : MonoBehaviour
 
     public void UpdateEnemyScore(int score)
     {
+        int preScore = System.Convert.ToInt32(enemyScoreTxt.text);
+        float ratio = (score - preScore) / 10.0f;
+        multTxt.text = "×" + ratio;
         enemyScoreTxt.text = score.ToString();
         enemyScoreTxt.color = addedScoreColor;
         playerScoreTxt.color = defaultColor;

@@ -17,6 +17,7 @@
         Pass
         {
             CGPROGRAM
+            #pragma target 5.0
             #pragma vertex vert
             #pragma fragment frag
             // make fog work
@@ -50,6 +51,7 @@
             int _PositionAndColorAryLength;
             float4 _MainTex_ST;
             float4 _DefaultTex_ST;
+            RWTexture2D<float4> _ColorCountTex : register(u2);   // 集計用のテクスチャ
 
             int calcColorMode(float4 worldPos)
             {
@@ -106,6 +108,14 @@
                     float2 uv = TRANSFORM_TEX(i.uv, _MainTex);  
                     col = _Color2 * tex2D(_MainTex, uv);
                 }
+
+                float xs, xy;
+                _ColorCountTex.GetDimensions(xs, xy);
+
+                int2 loc;
+                loc.x = (int)(xs * i.uv.x);
+                loc.y = (int)(xy * i.uv.y);
+                _ColorCountTex[loc] = float4(col.x, col.y, col.z, mode);
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

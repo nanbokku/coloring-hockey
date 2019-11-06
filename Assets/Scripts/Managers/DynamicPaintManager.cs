@@ -69,4 +69,9 @@ public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
     {
         paint.ComputeColorRatio(type, callback);
     }
+
+    public float ComputeColorRatio(PlayerType type)
+    {
+        return paint.ComputeColorRatio(type);
+    }
 }

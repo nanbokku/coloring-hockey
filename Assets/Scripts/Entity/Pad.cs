@@ -23,6 +23,11 @@ public class Pad : MonoBehaviour
         floorCenterOffset = StageData.FloorRadius - Radius;
     }
 
+    public void StopMovement()
+    {
+        this.rigidBody.velocity = Vector3.zero;
+    }
+
     public void MovePosition(Vector3 destination)
     {
         this.rigidBody.MovePosition(destination);

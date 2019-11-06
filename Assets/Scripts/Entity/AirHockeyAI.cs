@@ -30,6 +30,11 @@ public class AirHockeyAI : MonoBehaviour
     public void SetActiveOperation(bool active)
     {
         isActive = active;
+
+        if (isActive == false)
+        {
+            pad.StopMovement();
+        }
     }
 
     void Update()

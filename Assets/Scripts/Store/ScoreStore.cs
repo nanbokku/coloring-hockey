@@ -3,7 +3,9 @@ using UnityEngine.Events;
 
 public enum PlayerType
 {
-    Human, Ai, None
+    Human = 1,
+    Ai = 2,
+    None = 0
 }
 
 public class ScoreStore
@@ -21,13 +23,43 @@ public class ScoreStore
 
     private int humanScore = 0;
     private int aiScore = 0;
+    public int Round { get; private set; } = 0;
 
     private ScoreStore() { }
+
+    public void Initialize()
+    {
+        humanScore = 0;
+        aiScore = 0;
+        Round = 0;
+    }
 
     public int GetScore(PlayerType type)
     {
         if (type == PlayerType.Human) return humanScore;
         else return aiScore;
+    }
+
+    public void IncrementPoint(PlayerType type, float ratio)
+    {
+        int point = (int)(10 * (1 + ratio));
+
+        if (type == PlayerType.Human)
+        {
+            humanScore += point;
+
+            // viewに通知
+            if (OnPointIncremented != null) OnPointIncremented(PlayerType.Human);
+        }
+        else
+        {
+            aiScore += point;
+
+            // viewに通知
+            if (OnPointIncremented != null) OnPointIncremented(PlayerType.Ai);
+        }
+
+        Round++;
     }
 
     public void IncrementPoint(PlayerType type)
@@ -46,5 +78,7 @@ public class ScoreStore
             // viewに通知
             if (OnPointIncremented != null) OnPointIncremented(PlayerType.Ai);
         }
+
+        Round++;
     }
 }

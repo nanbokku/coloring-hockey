@@ -1,0 +1,35 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CountColor
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+// RWStructuredBuffer<int> _Result;
+RWStructuredBuffer<float4> _Result;
+Texture2D<float4> _Source;
+float4 _Color1;
+float4 _Color2;
+
+// bool equals(float4 a, float4 b)
+// {
+//     return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+// }
+
+[numthreads(8,8,1)]
+void CountColor (uint2 id : SV_DispatchThreadID)
+{
+   float4 color = _Source[id];
+
+   int xs, ys;
+   _Source.GetDimensions(xs, ys);
+
+   _Result[id.y * ys + id.x] = color;
+//    InterlockedAdd(_Result[color.w], 1);
+
+//    InterlockedAdd(_Result[0], color.x * 10);
+
+//    if (equals(color, _Color1)) {
+//        InterlockedAdd(_Result[1], 1);
+//    } else if (equals(color, _Color2)) {
+//        InterlockedAdd(_Result[2], 1);
+//    }
+}

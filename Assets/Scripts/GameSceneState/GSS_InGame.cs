@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using Constants;
 
 public class GSS_InGame : GameSceneStateBase
 {
     private InGameUIController inGameUiController = null;
     private GameStateBase currentState = null;
+    private bool isGameFinished = false;
 
     public override void Enter()
     {
@@ -17,9 +19,16 @@ public class GSS_InGame : GameSceneStateBase
 
     public override void Update()
     {
-        if (currentState == null) return;
+        if (currentState != null)
+        {
+            currentState.Update();
+        }
 
-        currentState.Update();
+        if (isGameFinished)
+        {
+            isGameFinished = false;
+            SceneManager.LoadScene(SceneName.Result);
+        }
     }
 
     public override void Exit()
@@ -29,7 +38,7 @@ public class GSS_InGame : GameSceneStateBase
 
     private void OnActiveSceneChanged(Scene before, Scene after)
     {
-        // OnStateChanged(new GSS_InGame());
+        OnStateChanged(new GSS_Result());
     }
 
     private void ChangeState(GameStateBase next)
@@ -38,6 +47,13 @@ public class GSS_InGame : GameSceneStateBase
         {
             currentState.Exit();
             currentState.OnStateChanged = null;
+        }
+
+        if (next == null)
+        {
+            isGameFinished = true;
+            currentState = null;
+            return;
         }
 
         currentState = next;

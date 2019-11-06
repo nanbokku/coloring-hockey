@@ -7,7 +7,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     void Start()
     {
-        ChangeSceneState(new GSS_InGame());
+        ChangeSceneState(new GSS_Title());
     }
 
     void Update()

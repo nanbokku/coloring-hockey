@@ -26,6 +26,9 @@ public class Puck : MonoBehaviour
     {
         if (!canDraw) return;
 
+        if (Vector3.Distance(lastPosition, this.transform.position) < 0.1f) return;
+
+        lastPosition = this.transform.position;
         DynamicPaintManager.Instance.AddDrawPoint(this.transform.position, this.lastPlayer);
     }
 

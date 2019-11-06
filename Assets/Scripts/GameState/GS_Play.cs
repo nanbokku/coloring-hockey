@@ -8,6 +8,9 @@ public class GS_Play : GameStateBase
     private AirHockeyAI ai = null;
     private PadController player = null;
     private GameObject puck = null;
+    private bool isGameFinished = false;
+
+    private const int MaxRound = 7;
 
     public GS_Play(InGameUIController uIController) : base(uIController)
     {
@@ -28,17 +31,26 @@ public class GS_Play : GameStateBase
                 ai.SetActiveOperation(false);
                 player.SetActiveOperation(false);
 
-                ScoreStore.Instance.IncrementPoint(type);
-                DynamicPaintManager.Instance.ComputeColorRatio(type, (ratio) =>
-                {
-                    Debug.Log(ratio);
-                });
+                float ratio = DynamicPaintManager.Instance.ComputeColorRatio(type);
+                ScoreStore.Instance.IncrementPoint(type, ratio);
+                // DynamicPaintManager.Instance.ComputeColorRatio(type, (ratio) =>
+                // {
+                //     Debug.Log(ratio);
+                // });
+
             };
         }
 
         inGameUiController.OnScoreUpdated = () =>
         {
-            Reset();
+            if (ScoreStore.Instance.Round < MaxRound)
+            {
+                Reset();
+            }
+            else
+            {
+                isGameFinished = true;
+            }
         };
 
         ai.Initialize(new HS_Normal());
@@ -48,12 +60,19 @@ public class GS_Play : GameStateBase
 
     public override void Update()
     {
+        if (!isGameFinished) return;
 
+        FinishGame();
     }
 
     public override void Exit()
     {
+    }
 
+    private void FinishGame()
+    {
+        isGameFinished = false;
+        OnStateChanged(null);
     }
 
     private void Reset()
