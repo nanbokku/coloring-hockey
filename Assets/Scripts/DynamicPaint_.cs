@@ -3,46 +3,33 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
+using Constants;
 
-public class DynamicPaint : MonoBehaviour
+public class DynamicPaint_ : MonoBehaviour
 {
     [SerializeField]
     private Renderer paintRenderer = null;
     [SerializeField]
     private Collider paintCollider = null;
     [SerializeField]
+    private Material paintMat = null;
+    [SerializeField]
     private Color color1 = Color.white;
     [SerializeField]
     private Color color2 = Color.white;
     [SerializeField]
-    private Color defaultColor = Color.white;
-    [SerializeField]
-    private Texture mainTexture = null;
-    [SerializeField]
-    private Texture defaultTexture = null;
+    private float brushRadius = 0.5f;
     private MaterialPropertyBlock materialBlock = null;
     [SerializeField]
-    private SpriteRenderer sprite;
-    [SerializeField]
     private ComputeShader colorCountShader = null;
-
-    /// <summary>
-    /// ワールド座標(xyz)とカラーナンバー(w)を格納する配列
-    /// </summary>
-    private Vector4[] drawWorldPositionsAndColorNumbers = new Vector4[1023];
-    /// <summary>
-    /// drawWorldPositionAndColorNumbersにおける現在のインデックス
-    /// </summary>
-    private int currentIndex = 0;
-    /// <summary>
-    /// drawWorldpositionsAndColorNumbersの長さ
-    /// </summary>
-    private int positionAndColorAryLength = 0;
+    private RenderTexture paintTexture = null;
 
     // shader property id
-    private int drawWorldPositionsAndColorNumbersId = Shader.PropertyToID("_DrawWorldPositionsAndColorNumbers");
-    private int currentIndexId = Shader.PropertyToID("_CurrentIndex");
-    private int positionAndColorAryLengthId = Shader.PropertyToID("_PositionAndColorAryLength");
+    private int paintColorId = Shader.PropertyToID("_PaintColor");
+    private int paintWorldPositionId = Shader.PropertyToID("_PaintWorldPosition");
+    private int paintUVId = Shader.PropertyToID("_PaintUV");
+    private int viewProjInvMatId = Shader.PropertyToID("_ViewProjInvMat");
+
     // 色が塗られた距離を保存
     private Dictionary<PlayerType, float> colorRecord = new Dictionary<PlayerType, float>();
 
@@ -61,20 +48,19 @@ public class DynamicPaint : MonoBehaviour
 
     void Awake()
     {
+        Camera.main.depthTextureMode = DepthTextureMode.Depth;
+
         materialBlock = new MaterialPropertyBlock();
-
-        // インスペクターから指定した値をシェーダーにセット
-        int color1Id = Shader.PropertyToID("_Color1");
-        int color2Id = Shader.PropertyToID("_Color2");
-        int defaultColorId = Shader.PropertyToID("_DefaultColor");
         int mainTextureId = Shader.PropertyToID("_MainTex");
-        int defaultTextureId = Shader.PropertyToID("_DefaultTex");
+        int radiusId = Shader.PropertyToID("_Radius");
 
-        materialBlock.SetColor(color1Id, color1);
-        materialBlock.SetColor(color2Id, color2);
-        materialBlock.SetColor(defaultColorId, defaultColor);
-        materialBlock.SetTexture(mainTextureId, mainTexture);
-        materialBlock.SetTexture(defaultTextureId, defaultTexture);
+        // オブジェクトのメインテクスチャをレンダーテクスチャに変更
+        Texture mainTexture = paintRenderer.material.mainTexture;
+        paintTexture = new RenderTexture(mainTexture.width, mainTexture.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Default);
+        Graphics.Blit(mainTexture, paintTexture);
+        paintRenderer.material.SetTexture(mainTextureId, paintTexture);
+
+        paintMat.SetFloat(radiusId, brushRadius);
 
         // 集計用シェーダーの設定
         kernelId = colorCountShader.FindKernel("CountColor");
@@ -84,9 +70,65 @@ public class DynamicPaint : MonoBehaviour
         Clear();
     }
 
+    private Vector4 CalcUV(Vector3 position)
+    {
+        Matrix4x4 viewMat = Camera.main.worldToCameraMatrix;
+        Matrix4x4 projectionMat = GL.GetGPUProjectionMatrix(Camera.main.projectionMatrix, false);   // 直接シェーダーに書き込むときはこのメソッドで補正をしてあげる
+        Matrix4x4 VP = projectionMat * viewMat;
+
+        // VP.inverse をクリップ座標に掛けるとワールド座標になる
+        paintMat.SetMatrix(viewProjInvMatId, VP.inverse);
+
+
+
+        Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(Camera.main, position);
+
+        screenPoint.x /= Screen.width;
+        screenPoint.y /= Screen.height;
+
+        return screenPoint;
+
+        Vector3 colSize = paintCollider.bounds.size;
+        Vector2 sizeXZ = new Vector2(colSize.x, colSize.z);
+
+        Vector2 position2 = new Vector2(position.x, position.z);
+        position2 += sizeXZ / 2.0f;    // 0 ~ sizeXZの範囲にする
+        position2 /= sizeXZ;    // 0 ~ 1の範囲にする
+
+        Debug.Log(position2);
+        return position2;
+    }
+
     public Vector3 ClosestPoint(Vector3 position)
     {
         return paintCollider.ClosestPoint(position);
+    }
+
+    public void Paint(Vector3 position, PlayerType type)
+    {
+        Vector4 point4 = position;
+
+        if (type == PlayerType.Human)
+        {
+            paintMat.SetColor(paintColorId, color1);
+        }
+        else if (type == PlayerType.Ai)
+        {
+            paintMat.SetColor(paintColorId, color2);
+        }
+
+        paintMat.SetVector(paintWorldPositionId, point4);
+        Vector4 uv = CalcUV(position);
+        Debug.Log("screen point: " + uv);
+        paintMat.SetVector(paintUVId, uv);
+
+        // シェーダーに値をセット
+        // paintRenderer.SetPropertyBlock(materialBlock);
+
+        RenderTexture temp = RenderTexture.GetTemporary(paintTexture.width, paintTexture.height);
+        Graphics.Blit(paintTexture, temp, paintMat);
+        Graphics.Blit(temp, paintTexture);
+        RenderTexture.ReleaseTemporary(temp);
     }
 
     public void AddDrawPoint(Vector3 point, PlayerType type)
@@ -130,20 +172,7 @@ public class DynamicPaint : MonoBehaviour
             lastColorInfo.Position = point;
         }
 
-        drawWorldPositionsAndColorNumbers[currentIndex] = point4;
-
-        if (positionAndColorAryLength < 1023) positionAndColorAryLength++;
-
-        materialBlock.SetVectorArray(drawWorldPositionsAndColorNumbersId, drawWorldPositionsAndColorNumbers);
-        materialBlock.SetInt(currentIndexId, currentIndex);
-        materialBlock.SetInt(positionAndColorAryLengthId, positionAndColorAryLength);
-
-        paintRenderer.SetPropertyBlock(materialBlock);
-
-        if (++currentIndex >= 1023)
-        {
-            currentIndex = 0;
-        }
+        // paintRenderer.SetPropertyBlock(materialBlock);
     }
 
     // void OnPostRender()
@@ -161,17 +190,10 @@ public class DynamicPaint : MonoBehaviour
 
     public void Clear()
     {
-        drawWorldPositionsAndColorNumbers = new Vector4[1023];
-        currentIndex = 0;
-        positionAndColorAryLength = 0;
         colorRecord = new Dictionary<PlayerType, float>();
         lastColorInfo = new ColorInfo();
 
-        materialBlock.SetVectorArray(drawWorldPositionsAndColorNumbersId, drawWorldPositionsAndColorNumbers);
-        materialBlock.SetInt(currentIndexId, currentIndex);
-        materialBlock.SetInt(positionAndColorAryLengthId, positionAndColorAryLength);
-
-        paintRenderer.SetPropertyBlock(materialBlock);
+        // paintRenderer.SetPropertyBlock(materialBlock);
 
         // バッファの初期化
         if (buffer != null) buffer.Release();

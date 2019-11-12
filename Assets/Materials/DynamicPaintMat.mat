@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Floor
-  m_Shader: {fileID: 10752, guid: 0000000000000000f000000000000000, type: 0}
+  m_Name: DynamicPaintMat
+  m_Shader: {fileID: 4800000, guid: b4bd35b16d10a8948905c5c08c9b744b, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -21,10 +21,6 @@ Material:
     m_TexEnvs:
     - _BumpMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DefaultTex:
-        m_Texture: {fileID: 2800000, guid: 9e8a8711524db0642ac5b5feed7360f2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -83,10 +79,6 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Color1: {r: 1, g: 0.08962262, b: 0.51933867, a: 1}
-    - _Color2: {r: 0.12722999, g: 0.0990566, b: 1, a: 1}
-    - _DefaultColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _PaintColor: {r: 1, g: 1, b: 1, a: 1}
-    - _PaintUV: {r: 1, g: 1, b: 0, a: 0}
-    - _Scale: {r: 10, g: 0.5, b: 10, a: 1}
+    - _PaintColor: {r: 0.1254902, g: 0.098039225, b: 1, a: 1}
+    - _PaintUV: {r: 0.41286582, g: 0.044197112, b: 0, a: 0}

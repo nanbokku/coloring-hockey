@@ -31,11 +31,11 @@ public class GS_Play : GameStateBase
                 ai.SetActiveOperation(false);
                 player.SetActiveOperation(false);
 
-                float ratio = DynamicPaintManager.Instance.ComputeColorRatio(type);
+                float ratio = DynamicPaintManager_.Instance.ComputeColorRatio(type);
                 ScoreStore.Instance.IncrementPoint(type, ratio);
-                // DynamicPaintManager.Instance.ComputeColorRatio(type, (ratio) =>
+                // DynamicPaintManager.Instance.ComputeColorRatio(type, (r) =>
                 // {
-                //     Debug.Log(ratio);
+                //     Debug.Log(r);
                 // });
 
             };
@@ -94,6 +94,6 @@ public class GS_Play : GameStateBase
         ai.SetActiveOperation(true);
         player.SetActiveOperation(true);
 
-        DynamicPaintManager.Instance.Clear();
+        DynamicPaintManager_.Instance.Clear();
     }
 }

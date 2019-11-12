@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using MonoBehaviourUtility;
+using UnityEngine.SceneManagement;
+using Constants;
 
 public class GameManager : SingletonMonoBehaviour<GameManager>
 {
@@ -7,7 +9,21 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     void Start()
     {
-        ChangeSceneState(new GSS_Title());
+        Screen.SetResolution(1024, 768, false, 60);
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (sceneName == SceneName.Title)
+        {
+            ChangeSceneState(new GSS_Title());
+        }
+        else if (sceneName == SceneName.InGame)
+        {
+            ChangeSceneState(new GSS_InGame());
+        }
+        else if (sceneName == SceneName.Result)
+        {
+            ChangeSceneState(new GSS_Result());
+        }
     }
 
     void Update()

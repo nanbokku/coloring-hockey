@@ -112,9 +112,7 @@
                 float xs, xy;
                 _ColorCountTex.GetDimensions(xs, xy);
 
-                int2 loc;
-                loc.x = (int)(xs * i.uv.x);
-                loc.y = (int)(xy * i.uv.y);
+                int2 loc = int2(xs * i.uv.x, xy * i.uv.y);
                 _ColorCountTex[loc] = float4(col.x, col.y, col.z, mode);
 
                 // apply fog
@@ -124,5 +122,5 @@
             ENDCG
         }
     }
-    // Fallback "Diffuse"
+    Fallback "Diffuse"
 }

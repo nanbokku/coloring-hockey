@@ -2,17 +2,17 @@
 using MonoBehaviourUtility;
 using UnityEngine.Events;
 
-[RequireComponent(typeof(DynamicPaint))]
-public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
+[RequireComponent(typeof(DynamicPaint_))]
+public class DynamicPaintManager_ : SingletonMonoBehaviour<DynamicPaintManager_>
 {
-    private DynamicPaint paint = null;
-    private DynamicPaint Paint
+    private DynamicPaint_ paint = null;
+    private DynamicPaint_ Paint
     {
         get
         {
             if (paint == null)
             {
-                paint = GetComponent<DynamicPaint>();
+                paint = GetComponent<DynamicPaint_>();
             }
 
             return paint;
@@ -26,7 +26,7 @@ public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
 
     public void AddDrawPoint(Vector3 point, PlayerType type)
     {
-        Paint.AddDrawPoint(ClosestPoint(point), type);
+        Paint.Paint(ClosestPoint(point), type);
     }
 
     public Vector3 ClosestPoint(Vector3 position)
