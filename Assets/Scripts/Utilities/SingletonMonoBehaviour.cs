@@ -31,6 +31,7 @@ namespace MonoBehaviourUtility
                 return;
             }
 
+            this.transform.parent = null;
             DontDestroyOnLoad(this.gameObject);
         }
     }

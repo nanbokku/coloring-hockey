@@ -19,16 +19,19 @@ public class DynamicPaint_ : MonoBehaviour
     private Color color2 = Color.white;
     [SerializeField]
     private float brushRadius = 0.5f;
-    private MaterialPropertyBlock materialBlock = null;
+    [SerializeField]
+    private Mesh mesh = null;
     [SerializeField]
     private ComputeShader colorCountShader = null;
-    private RenderTexture paintTexture = null;
+    [SerializeField]
+    private Material vertexMapMat = null;
+    private CustomRenderTexture paintTexture = null;
+    private RenderTexture vertexMap = null;
 
     // shader property id
     private int paintColorId = Shader.PropertyToID("_PaintColor");
     private int paintWorldPositionId = Shader.PropertyToID("_PaintWorldPosition");
-    private int paintUVId = Shader.PropertyToID("_PaintUV");
-    private int viewProjInvMatId = Shader.PropertyToID("_ViewProjInvMat");
+    private int objectToWorldMatId = Shader.PropertyToID("_ObjectToWorldMat");
 
     // 色が塗られた距離を保存
     private Dictionary<PlayerType, float> colorRecord = new Dictionary<PlayerType, float>();
@@ -40,27 +43,59 @@ public class DynamicPaint_ : MonoBehaviour
     private int colorCountTexId = Shader.PropertyToID("_ColorCountTex");
     private int bufferId = Shader.PropertyToID("_Result");
 
+    public Renderer buf = null;
+
     private class ColorInfo
     {
         public PlayerType Color { get; set; } = PlayerType.None;
         public Vector3 Position { get; set; } = Vector3.zero;
     }
 
-    void Awake()
+    void Start()
     {
-        Camera.main.depthTextureMode = DepthTextureMode.Depth;
+        Texture mainTexture = paintRenderer.material.mainTexture;
 
-        materialBlock = new MaterialPropertyBlock();
-        int mainTextureId = Shader.PropertyToID("_MainTex");
-        int radiusId = Shader.PropertyToID("_Radius");
+        // メインテクスチャの解像度が低い場合は固定値
+        int width = mainTexture.width;
+        int height = mainTexture.height;
+        if (width < 256 || height < 256)
+        {
+            width = 256;
+            height = 256;
+        }
 
         // オブジェクトのメインテクスチャをレンダーテクスチャに変更
-        Texture mainTexture = paintRenderer.material.mainTexture;
-        paintTexture = new RenderTexture(mainTexture.width, mainTexture.height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Default);
-        Graphics.Blit(mainTexture, paintTexture);
+        paintTexture = new CustomRenderTexture(width, height, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default)
+        {
+            material = paintMat,
+            initializationSource = CustomRenderTextureInitializationSource.TextureAndColor,
+            initializationColor = Color.white,
+            initializationTexture = mainTexture,
+            initializationMode = CustomRenderTextureUpdateMode.OnDemand,
+            updateMode = CustomRenderTextureUpdateMode.OnDemand,
+            doubleBuffered = true
+        };
+        paintTexture.Create();
+        paintTexture.Initialize();
+
+        int mainTextureId = Shader.PropertyToID("_MainTex");
         paintRenderer.material.SetTexture(mainTextureId, paintTexture);
 
+        // 頂点マップを作成
+        vertexMap = new RenderTexture(width, height, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Default)
+        {
+            filterMode = FilterMode.Point
+        };
+
+        // 頂点マップの初期化
+        SetVertexMap();
+
+        buf.material.mainTexture = paintTexture;
+
+        int radiusId = Shader.PropertyToID("_Radius");
+        int vertexMapId = Shader.PropertyToID("_VertexMap");
         paintMat.SetFloat(radiusId, brushRadius);
+        paintMat.SetTexture(vertexMapId, vertexMap);
 
         // 集計用シェーダーの設定
         kernelId = colorCountShader.FindKernel("CountColor");
@@ -70,33 +105,16 @@ public class DynamicPaint_ : MonoBehaviour
         Clear();
     }
 
-    private Vector4 CalcUV(Vector3 position)
+    private void SetVertexMap()
     {
-        Matrix4x4 viewMat = Camera.main.worldToCameraMatrix;
-        Matrix4x4 projectionMat = GL.GetGPUProjectionMatrix(Camera.main.projectionMatrix, false);   // 直接シェーダーに書き込むときはこのメソッドで補正をしてあげる
-        Matrix4x4 VP = projectionMat * viewMat;
+        // DrawMeshNow()で使用するシェーダーパスを指定
+        vertexMapMat.SetPass(0);
 
-        // VP.inverse をクリップ座標に掛けるとワールド座標になる
-        paintMat.SetMatrix(viewProjInvMatId, VP.inverse);
+        // 描画対象を頂点マップにする
+        Graphics.SetRenderTarget(vertexMap);
 
-
-
-        Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(Camera.main, position);
-
-        screenPoint.x /= Screen.width;
-        screenPoint.y /= Screen.height;
-
-        return screenPoint;
-
-        Vector3 colSize = paintCollider.bounds.size;
-        Vector2 sizeXZ = new Vector2(colSize.x, colSize.z);
-
-        Vector2 position2 = new Vector2(position.x, position.z);
-        position2 += sizeXZ / 2.0f;    // 0 ~ sizeXZの範囲にする
-        position2 /= sizeXZ;    // 0 ~ 1の範囲にする
-
-        Debug.Log(position2);
-        return position2;
+        // RenderTextureに書き込み
+        Graphics.DrawMeshNow(mesh, Matrix4x4.identity);
     }
 
     public Vector3 ClosestPoint(Vector3 position)
@@ -118,17 +136,9 @@ public class DynamicPaint_ : MonoBehaviour
         }
 
         paintMat.SetVector(paintWorldPositionId, point4);
-        Vector4 uv = CalcUV(position);
-        Debug.Log("screen point: " + uv);
-        paintMat.SetVector(paintUVId, uv);
 
-        // シェーダーに値をセット
-        // paintRenderer.SetPropertyBlock(materialBlock);
-
-        RenderTexture temp = RenderTexture.GetTemporary(paintTexture.width, paintTexture.height);
-        Graphics.Blit(paintTexture, temp, paintMat);
-        Graphics.Blit(temp, paintTexture);
-        RenderTexture.ReleaseTemporary(temp);
+        paintMat.SetMatrix(objectToWorldMatId, paintRenderer.localToWorldMatrix);
+        paintTexture.Update(1);
     }
 
     public void AddDrawPoint(Vector3 point, PlayerType type)
@@ -171,47 +181,31 @@ public class DynamicPaint_ : MonoBehaviour
             lastColorInfo.Color = type;
             lastColorInfo.Position = point;
         }
-
-        // paintRenderer.SetPropertyBlock(materialBlock);
     }
-
-    // void OnPostRender()
-    // {
-    //     // Graphics.ClearRandomWriteTargets();
-    //     Graphics.SetRandomWriteTarget(2, colorCountTexture);
-
-    //     var tempTex = RenderTexture.GetTemporary(colorCountTexture.width, colorCountTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-    //     Graphics.Blit(colorCountTexture, tempTex, paintRenderer.material);
-    //     Graphics.Blit(tempTex, colorCountTexture);
-    //     RenderTexture.ReleaseTemporary(tempTex);
-
-    //     // Graphics.ClearRandomWriteTargets();
-    // }
 
     public void Clear()
     {
         colorRecord = new Dictionary<PlayerType, float>();
         lastColorInfo = new ColorInfo();
 
-        // paintRenderer.SetPropertyBlock(materialBlock);
-
         // バッファの初期化
         if (buffer != null) buffer.Release();
         // buffer = new ComputeBuffer(3, sizeof(int));
-        buffer = new ComputeBuffer(8 * 16, sizeof(float) * 4);
+        using (buffer = new ComputeBuffer(8 * 16, sizeof(float) * 4))
+        {
+            // 集計用テクスチャの生成
+            if (colorCountTexture != null) colorCountTexture.Release();
+            colorCountTexture = new RenderTexture(1024, 1024, 0, RenderTextureFormat.ARGB32);
+            colorCountTexture.hideFlags = HideFlags.HideAndDontSave;
+            colorCountTexture.enableRandomWrite = true;
+            colorCountTexture.filterMode = FilterMode.Point;
+            colorCountTexture.Create();
 
-        // 集計用テクスチャの生成
-        if (colorCountTexture != null) colorCountTexture.Release();
-        colorCountTexture = new RenderTexture(1024, 1024, 0, RenderTextureFormat.ARGB32);
-        colorCountTexture.hideFlags = HideFlags.HideAndDontSave;
-        colorCountTexture.enableRandomWrite = true;
-        colorCountTexture.filterMode = FilterMode.Point;
-        colorCountTexture.Create();
+            // Graphics.SetRenderTarget(colorCountTexture);
 
-        // Graphics.SetRenderTarget(colorCountTexture);
-
-        colorCountShader.SetBuffer(kernelId, bufferId, buffer);
-        colorCountShader.SetTexture(kernelId, "_Source", colorCountTexture);
+            colorCountShader.SetBuffer(kernelId, bufferId, buffer);
+            colorCountShader.SetTexture(kernelId, "_Source", colorCountTexture);
+        }
 
         // var commandBuffer = new CommandBuffer();
         // int tempId = Shader.PropertyToID("_TempTex");
