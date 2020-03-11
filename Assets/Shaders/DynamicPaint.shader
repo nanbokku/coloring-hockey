@@ -2,12 +2,8 @@
 {
     Properties
     {
-        _MainTex ("Texture1", 2D) = "white" {}
-        _DefaultTex ("DefaultTexture", 2D) = "white" {}
-        _Color1 ("Color1", Color) = (1, 1, 1, 1)
-        _Color2 ("Color2", Color) = (1, 1, 1, 1)
-        _DefaultColor ("DefaultColor", Color) = (1, 1, 1, 1)
-        _Radius ("Radius", Float) = 1.0
+        _PaintTex ("PaintTexture", 2D) = "white" {}
+        _PaintColor ("PaintColor", Color) = (1, 1, 1, 1)
     }
     SubShader
     {
@@ -18,105 +14,73 @@
         {
             CGPROGRAM
             #pragma target 5.0
-            #pragma vertex vert
+            #pragma vertex CustomRenderTextureVertexShader // vertex shaderは定義されているものを使う
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
 
-            #include "UnityCG.cginc"
+            #include "UnityCustomRenderTexture.cginc"
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
+            // 都度設定する値
+            float4 _PaintWorldPosition; // ペイント位置
+            float4 _PaintColor; // ペイントカラー
+            float4x4 _ObjectToWorldMat; // ローカルからワールド座標系への変換行列
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 worldPos : TEXCOORD1;
-                UNITY_FOG_COORDS(2)
-                float4 vertex : SV_POSITION;
-            };
-
-            sampler2D _MainTex;
-            sampler2D _DefaultTex;
-            float4 _Color1;
-            float4 _Color2;
-            float4 _DefaultColor;
+            sampler2D _PaintTex;
+            float4 _PaintTex_ST;
             half _Radius;
-            // ワールド座標(xyz)とカラーナンバー(w)
-            float4 _DrawWorldPositionsAndColorNumbers[1023];
-            int _CurrentIndex;
-            int _PositionAndColorAryLength;
-            float4 _MainTex_ST;
-            float4 _DefaultTex_ST;
-            RWTexture2D<float4> _ColorCountTex : register(u2);   // 集計用のテクスチャ
+            sampler2D _VertexMap;   // 頂点マップ
+            RWTexture2D<float4> _ColorCountTex : register(u1);   // 集計用のテクスチャ
 
-            int calcColorMode(float4 worldPos)
+            bool isPaintRange(float3 worldPos)
             {
-                int i=0, count=0;
-                for(count = 0; count < _PositionAndColorAryLength; count++) {
-                    i = _CurrentIndex - count;
-                    if (i < 0) i = 1023 + i;
+                float dist = distance(_PaintWorldPosition.xyz, worldPos);
 
-                    half dist = distance(_DrawWorldPositionsAndColorNumbers[i].xyz, worldPos.xyz);
-
-                    if (dist < _Radius) break;
-                }
-
-                // 見つからなかった場合はDefaultColor
-                if (_PositionAndColorAryLength == 0 || count >= _PositionAndColorAryLength) {
-                    return 0;
-                }
-
-                return _DrawWorldPositionsAndColorNumbers[i].w;
+                return dist < _Radius;
             }
 
-            v2f vert (appdata v)
+            float2 calcPaintUV(float3 worldPos)
             {
-                v2f o;
-                // クリップ座標に変換
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                
-                // ワールド座標に変換
-                float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
-                worldPos /= worldPos.w;
+                float dist = distance(_PaintWorldPosition.xyz, worldPos);
+                float ratio = dist / _Radius;
 
-                o.worldPos = worldPos;
-                o.uv = v.uv;
+                // 向きを計算（XY平面）
+                fixed2 dir = worldPos.xy / (worldPos.z + 1e-4) - _PaintWorldPosition.xy / (_PaintWorldPosition.z + 1e-4);
 
-                UNITY_TRANSFER_FOG(o,o.vertex);
-                return o;
+                // UV座標を計算
+                float2 uv = sign(dir) * ratio;
+                uv = (uv + 1.0) * 0.5;
+
+                return uv;                
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            fixed4 frag (v2f_customrendertexture i) : SV_Target
             {
-                int mode = calcColorMode(i.worldPos);
+                // 頂点座標からワールド座標を取得
+                float2 uv = i.globalTexcoord;
+                float4 vertex = float4(tex2D(_VertexMap, uv));
+                float3 worldPos = mul(_ObjectToWorldMat, vertex);
 
-                fixed4 col = fixed4(0, 0, 0, 0);
-                if (mode == 0) {
-                    // 上塗りしない場合
-                    float2 uv = TRANSFORM_TEX(i.uv, _DefaultTex);
-                    col = _DefaultColor * tex2D(_DefaultTex, uv);
-                } else if (mode == 1) {
-                    // _MainTex1が上になる
-                    float2 uv = TRANSFORM_TEX(i.uv, _MainTex);
-                    col = _Color1 * tex2D(_MainTex, uv);
-                } else {
-                    // _MainTex2が上になる
-                    float2 uv = TRANSFORM_TEX(i.uv, _MainTex);  
-                    col = _Color2 * tex2D(_MainTex, uv);
+                // 前フレームのテクスチャ
+                fixed4 col = tex2D(_SelfTexture2D, uv);
+                if (isPaintRange(worldPos)) {
+                    // ペイントする
+                    float2 paintUV = calcPaintUV(worldPos);
+                    paintUV = TRANSFORM_TEX(paintUV, _PaintTex);
+                    fixed4 paintCol = _PaintColor * tex2D(_PaintTex, paintUV);
+
+                    col = lerp(paintCol, col, paintCol.a);
+
+                    // ペイントした色を記録する
+                    float xs, ys;
+                    _ColorCountTex.GetDimensions(xs, ys);
+
+                    int2 loc = int2(xs * uv.x, ys * uv.y);
+                    _ColorCountTex[loc] = _PaintColor;
                 }
-
-                float xs, xy;
-                _ColorCountTex.GetDimensions(xs, xy);
-
-                int2 loc = int2(xs * i.uv.x, xy * i.uv.y);
-                _ColorCountTex[loc] = float4(col.x, col.y, col.z, mode);
 
                 // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                // UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG

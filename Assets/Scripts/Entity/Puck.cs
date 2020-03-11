@@ -29,7 +29,7 @@ public class Puck : MonoBehaviour
         if (Vector3.Distance(lastPosition, this.transform.position) < 0.1f) return;
 
         lastPosition = this.transform.position;
-        DynamicPaintManager_.Instance.AddDrawPoint(this.transform.position, this.lastPlayer);
+        DynamicPaintManager.Instance.AddDrawPoint(this.transform.position, this.lastPlayer);
     }
 
     void OnEnable()
@@ -48,7 +48,7 @@ public class Puck : MonoBehaviour
     {
         if (other.gameObject.tag != StageData.TagNameOfPad) return;
 
-        DynamicPaintManager_.Instance.ChangeColor(other.gameObject, this);
+        DynamicPaintManager.Instance.ChangeColor(other.gameObject, this);
     }
 
     public void UpdateLastCollisionPlayer(PlayerType type)
