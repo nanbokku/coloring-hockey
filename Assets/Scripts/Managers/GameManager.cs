@@ -9,8 +9,10 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     void Start()
     {
+        // 解像度を固定する．
         Screen.SetResolution(1024, 768, false, 60);
 
+        // 現在のシーンに応じてゲームステートをセット
         string sceneName = SceneManager.GetActiveScene().name;
         if (sceneName == SceneName.Title)
         {
@@ -33,6 +35,10 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         currentState.Update();
     }
 
+    /// <summary>
+    /// ゲームシーンステートを変更する
+    /// </summary>
+    /// <param name="next">変更するステート</param>
     void ChangeSceneState(GameSceneStateBase next)
     {
         if (currentState != null)
@@ -44,6 +50,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         currentState = next;
         currentState.OnStateChanged = (state) =>
         {
+            // OnStateChangedイベントが呼ばれたら再帰的に自身を呼ぶ
             ChangeSceneState(state);
         };
 

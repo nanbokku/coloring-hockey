@@ -34,6 +34,11 @@ public class HS_Normal : IHockeyStrategy
         }
     }
 
+    /// <summary>
+    /// パックに向かっていく最大距離
+    /// </summary>
+    /// <param name="pad"></param>
+    /// <returns></returns>
     private float DistanceFromPuckToGoal(Pad pad)
     {
         return StageData.FloorRadius + pad.Radius * 2;

@@ -8,6 +8,10 @@ public class Pad : MonoBehaviour
     [SerializeField]
     private Rigidbody rigidBody = null;
 
+    /// <summary>
+    /// パッドの半径
+    /// </summary>
+    /// <value></value>
     public float Radius { get; private set; } = 0;
 
     private float positionY = 0;
@@ -19,20 +23,35 @@ public class Pad : MonoBehaviour
 
         this.rigidBody.isKinematic = true;
 
+        // メッシュ情報から半径を取得
         Radius = meshFilter.mesh.bounds.size.x * transform.localScale.x / 2.0f;
         floorCenterOffset = StageData.FloorRadius - Radius;
     }
 
+    /// <summary>
+    /// 移動を止める
+    /// </summary>
     public void StopMovement()
     {
         this.rigidBody.velocity = Vector3.zero;
     }
 
+    /// <summary>
+    /// 位置を移動する
+    /// </summary>
+    /// <param name="destination"></param>
     public void MovePosition(Vector3 destination)
     {
         this.rigidBody.MovePosition(destination);
     }
 
+    /// <summary>
+    /// 移動先を制限する
+    /// </summary>
+    /// <param name="minZ">最小Z座標</param>
+    /// <param name="maxZ">最大Z座標</param>
+    /// <param name="position">位置</param>
+    /// <returns></returns>
     public Vector3 RestrictDestination(float minZ, float maxZ, Vector3 position)
     {
         position.y = positionY;

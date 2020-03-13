@@ -15,6 +15,10 @@ public class TitleUIController : MonoBehaviour
     [SerializeField]
     private GameObject howto = null;
 
+    /// <summary>
+    /// スタートボタンを押下したときのイベント
+    /// </summary>
+    /// <value></value>
     public UnityAction OnStartBtnClicked { get; set; } = null;
 
     void Start()

@@ -12,8 +12,10 @@ public class GSS_InGame : GameSceneStateBase
     {
         inGameUiController = MonoBehaviour.FindObjectOfType<InGameUIController>();
 
+        // シーンをロードしたときのイベントを登録
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
+        // ゲームステートの初期化
         ChangeState(new GS_Countdown(inGameUiController));
     }
 
@@ -24,6 +26,7 @@ public class GSS_InGame : GameSceneStateBase
             currentState.Update();
         }
 
+        // ゲーム終了フラグが立っていたらリザルトシーンに遷移
         if (isGameFinished)
         {
             isGameFinished = false;
@@ -36,11 +39,20 @@ public class GSS_InGame : GameSceneStateBase
         SceneManager.activeSceneChanged -= OnActiveSceneChanged;
     }
 
+    /// <summary>
+    /// シーンをロードしたときのイベント
+    /// </summary>
+    /// <param name="before"></param>
+    /// <param name="after"></param>
     private void OnActiveSceneChanged(Scene before, Scene after)
     {
         OnStateChanged(new GSS_Result());
     }
 
+    /// <summary>
+    /// シーンステートを変更する
+    /// </summary>
+    /// <param name="next">次のゲームシーンステート</param>
     private void ChangeState(GameStateBase next)
     {
         if (currentState != null)
@@ -49,6 +61,7 @@ public class GSS_InGame : GameSceneStateBase
             currentState.OnStateChanged = null;
         }
 
+        // 次のステートがなかったらゲーム終了
         if (next == null)
         {
             isGameFinished = true;

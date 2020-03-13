@@ -10,11 +10,13 @@ public class GSS_Result : GameSceneStateBase
     {
         uIController = MonoBehaviour.FindObjectOfType<ResultUIController>();
 
+        // タイトルボタンを押下したらタイトルシーンをロード
         uIController.OnTitleBtnClicked = () =>
         {
             SceneManager.LoadScene(SceneName.Title);
         };
 
+        // シーンをロードしたときのイベントを登録
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
         int humanScore = ScoreStore.Instance.GetScore(PlayerType.Human);
@@ -42,8 +44,14 @@ public class GSS_Result : GameSceneStateBase
         SceneManager.activeSceneChanged -= OnActiveSceneChanged;
     }
 
+    /// <summary>
+    /// シーンをロードしたときのイベント
+    /// </summary>
+    /// <param name="before"></param>
+    /// <param name="after"></param>
     private void OnActiveSceneChanged(Scene before, Scene after)
     {
+        // タイトルシーンステートに遷移
         OnStateChanged(new GSS_Title());
     }
 }

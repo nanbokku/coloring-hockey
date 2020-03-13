@@ -16,6 +16,7 @@ public class AirHockeyTool : MonoBehaviour
 
     void Awake()
     {
+        // メッシュ情報から半径を取得
         radiusX = meshFilter.mesh.bounds.size.x * this.transform.localScale.x / 2.0f;
     }
 

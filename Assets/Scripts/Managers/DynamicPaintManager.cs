@@ -23,16 +23,29 @@ public class DynamicPaintManager : SingletonMonoBehaviour<DynamicPaintManager>
     [SerializeField]
     private GameObject aiPadObj = null;
 
+    /// <summary>
+    /// ペイント位置を追加する
+    /// </summary>
+    /// <param name="point">ペイント位置</param>
+    /// <param name="type">プレイヤータイプ</param>
     public void AddDrawPoint(Vector3 point, PlayerType type)
     {
         Paint.Paint(ClosestPoint(point), type);
     }
 
+    /// <summary>
+    /// ペイント対象のコライダーに一番近い位置を返す
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
     public Vector3 ClosestPoint(Vector3 position)
     {
         return Paint.ClosestPoint(position);
     }
 
+    /// <summary>
+    /// ペイント対象のテクスチャをリセットする
+    /// </summary>
     public void Clear()
     {
         Paint.Clear();

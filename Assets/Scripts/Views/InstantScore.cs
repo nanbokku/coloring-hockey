@@ -18,6 +18,10 @@ public class InstantScore : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI multTxt = null;
 
+    /// <summary>
+    /// スコアのアニメーションが終了したら呼ばれるイベント
+    /// </summary>
+    /// <value></value>
     public UnityAction OnScoreAnimFinished { get; set; } = null;
 
     private const string PlayerScoreAnimTriggerStr = "flash_left";
@@ -29,6 +33,10 @@ public class InstantScore : MonoBehaviour
         enemyScoreTxt.text = 0.ToString();
     }
 
+    /// <summary>
+    /// プレイヤーのスコアを更新する
+    /// </summary>
+    /// <param name="score"></param>
     public void UpdatePlayerScore(int score)
     {
         int preScore = System.Convert.ToInt32(playerScoreTxt.text);
@@ -40,6 +48,10 @@ public class InstantScore : MonoBehaviour
         instantScoreAnimator.SetTrigger(PlayerScoreAnimTriggerStr);
     }
 
+    /// <summary>
+    /// エネミーのスコアを更新する
+    /// </summary>
+    /// <param name="score"></param>
     public void UpdateEnemyScore(int score)
     {
         int preScore = System.Convert.ToInt32(enemyScoreTxt.text);
@@ -51,6 +63,9 @@ public class InstantScore : MonoBehaviour
         instantScoreAnimator.SetTrigger(EnemyScoreAnimTriggerStr);
     }
 
+    /// <summary>
+    /// アニメーションが終了したときに呼ばれるメソッド
+    /// </summary>
     public void ScoreAnimFinished()
     {
         OnScoreAnimFinished();

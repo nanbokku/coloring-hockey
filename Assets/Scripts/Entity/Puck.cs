@@ -28,6 +28,7 @@ public class Puck : MonoBehaviour
 
         if (Vector3.Distance(lastPosition, this.transform.position) < 0.1f) return;
 
+        // 軌跡をペイントする
         lastPosition = this.transform.position;
         DynamicPaintManager.Instance.AddDrawPoint(this.transform.position, this.lastPlayer);
     }

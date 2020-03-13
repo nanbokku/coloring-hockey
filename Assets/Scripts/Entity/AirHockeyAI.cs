@@ -16,17 +16,29 @@ public class AirHockeyAI : MonoBehaviour
         destination = this.transform.position;
     }
 
+    /// <summary>
+    /// AIの初期化
+    /// </summary>
+    /// <param name="strategy"></param>
     public void Initialize(IHockeyStrategy strategy)
     {
         this.strategy = strategy;
     }
 
+    /// <summary>
+    /// ゲームをリセットする
+    /// </summary>
+    /// <param name="puck"></param>
     public void ResetGame(GameObject puck)
     {
         this.transform.position = PlayerData.AiInitPosition;
         this.puck = puck.transform;
     }
 
+    /// <summary>
+    /// アクティブ状態を変更する
+    /// </summary>
+    /// <param name="active"></param>
     public void SetActiveOperation(bool active)
     {
         isActive = active;
@@ -42,8 +54,10 @@ public class AirHockeyAI : MonoBehaviour
         if (!isActive) return;
         if (strategy == null) return;
 
+        // 移動先を決定
         destination = strategy.GetDestination(pad, puck.position);
 
+        // 移動先の補正
         destination = pad.RestrictDestination(StageData.FloorPosition.z + pad.Radius, StageData.FloorPosition.z + StageData.FloorRadius, destination);
     }
 

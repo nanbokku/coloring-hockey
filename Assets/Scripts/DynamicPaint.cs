@@ -2,25 +2,58 @@ using UnityEngine;
 
 public class DynamicPaint : MonoBehaviour
 {
+    /// <summary>
+    /// ペイント対象のレンダラー
+    /// </summary>
     [SerializeField]
     private Renderer paintRenderer = null;
+    /// <summary>
+    /// ペイント対象のコライダ―
+    /// </summary>
     [SerializeField]
     private Collider paintCollider = null;
+    /// <summary>
+    /// ペイント用マテリアル
+    /// </summary>
     [SerializeField]
     private Material paintMat = null;
+    /// <summary>
+    /// プレイヤー1の塗り色
+    /// </summary>
     [SerializeField]
     private Color color1 = Color.white;
+    /// <summary>
+    /// プレイヤー2の塗り色
+    /// </summary>
     [SerializeField]
     private Color color2 = Color.white;
+    /// <summary>
+    /// ペイントする半径
+    /// </summary>
     [SerializeField]
     private float brushRadius = 0.5f;
+    /// <summary>
+    /// ペイント対象のメッシュ
+    /// </summary>
     [SerializeField]
     private Mesh mesh = null;
+    /// <summary>
+    /// 集計用シェーダー
+    /// </summary>
     [SerializeField]
     private ComputeShader colorCountShader = null;
+    /// <summary>
+    /// 頂点マップ作成用のマテリアル
+    /// </summary>
     [SerializeField]
     private Material vertexMapMat = null;
+    /// <summary>
+    /// ペイントするテクスチャ（メインテクスチャに設定される）
+    /// </summary>
     private CustomRenderTexture paintTexture = null;
+    /// <summary>
+    /// 頂点マップ
+    /// </summary>
     private RenderTexture vertexMap = null;
 
     public Renderer forDebug = null;
@@ -31,7 +64,13 @@ public class DynamicPaint : MonoBehaviour
     private int paintWorldPositionId = Shader.PropertyToID("_PaintWorldPosition");
     private int objectToWorldMatId = Shader.PropertyToID("_ObjectToWorldMat");
 
+    /// <summary>
+    /// 集計用バッファ
+    /// </summary>
     private ComputeBuffer buffer = null;
+    /// <summary>
+    /// 集計用テクスチャ
+    /// </summary>
     private RenderTexture colorCountTexture = null;
     private int kernelId = 0;
     private int colorCountTexId = Shader.PropertyToID("_ColorCountTex");
@@ -90,7 +129,7 @@ public class DynamicPaint : MonoBehaviour
         colorCountShader.SetVector(color1Id, color1);
         colorCountShader.SetVector(color2Id, color2);
 
-        Clear();
+        Clear(false);
     }
 
     void OnDestroy()
@@ -98,6 +137,9 @@ public class DynamicPaint : MonoBehaviour
         buffer.Release();
     }
 
+    /// <summary>
+    /// 頂点マップをセットする
+    /// </summary>
     private void SetVertexMap()
     {
         // DrawMeshNow()で使用するシェーダーパスを指定
@@ -113,11 +155,21 @@ public class DynamicPaint : MonoBehaviour
         paintMat.SetTexture(vertexMapId, vertexMap);
     }
 
+    /// <summary>
+    /// コライダーから一番近い点を返す
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
     public Vector3 ClosestPoint(Vector3 position)
     {
         return paintCollider.ClosestPoint(position);
     }
 
+    /// <summary>
+    /// ペイントする
+    /// </summary>
+    /// <param name="position">ペイントする位置</param>
+    /// <param name="type">プレイヤータイプ</param>
     public void Paint(Vector3 position, PlayerType type)
     {
         Vector4 point4 = position;
@@ -142,39 +194,75 @@ public class DynamicPaint : MonoBehaviour
         paintTexture.Update(1);
     }
 
-    public void Clear()
+    /// <summary>
+    /// ペイント用テクスチャをリセット
+    /// </summary>
+    /// <param name="recreate">テクスチャを再生成するか</param>
+    private void ResetPaintTexture(bool recreate)
     {
-        // CustomRenderTexture.Initialize()では_SelfTexture2Dが初期化されないため，新たにCustomRenderTextureを作成する
-        var tmpTexture = new CustomRenderTexture(paintTexture.width, paintTexture.height, paintTexture.format, RenderTextureReadWrite.Default)
+        if (recreate && paintTexture != null)
         {
-            material = paintTexture.material,
-            initializationSource = paintTexture.initializationSource,
-            initializationColor = paintTexture.initializationColor,
-            initializationTexture = paintTexture.initializationTexture,
-            initializationMode = paintTexture.initializationMode,
-            updateMode = paintTexture.updateMode,
-            doubleBuffered = paintTexture.doubleBuffered
-        };
-        tmpTexture.Create();
-        paintTexture.Release();
-        paintTexture = tmpTexture;
+            // CustomRenderTexture.Initialize()では_SelfTexture2Dが初期化されないため，新たにCustomRenderTextureを作成する
+            var tmpTexture = new CustomRenderTexture(paintTexture.width, paintTexture.height, paintTexture.format, RenderTextureReadWrite.Default)
+            {
+                material = paintTexture.material,
+                initializationSource = paintTexture.initializationSource,
+                initializationColor = paintTexture.initializationColor,
+                initializationTexture = paintTexture.initializationTexture,
+                initializationMode = paintTexture.initializationMode,
+                updateMode = paintTexture.updateMode,
+                doubleBuffered = paintTexture.doubleBuffered
+            };
+            tmpTexture.Create();
+            paintTexture.Release();
+            paintTexture = tmpTexture;
+        }
+
         paintTexture.Initialize();
 
         // メインテクスチャにセット
         paintRenderer.material.mainTexture = paintTexture;
+    }
 
+    /// <summary>
+    /// コンピュートバッファーをリセット
+    /// </summary>
+    private void ResetComputeBuffer()
+    {
         // バッファの初期化
         if (buffer != null) buffer.Release();
         buffer = new ComputeBuffer(3, sizeof(int));
 
-        // 集計用テクスチャの初期化
-        var tmp = RenderTexture.GetTemporary(colorCountTexture.descriptor);
-        Graphics.Blit(tmp, colorCountTexture);
-        RenderTexture.ReleaseTemporary(tmp);
-
         // 集計用シェーダーに値をセット
         colorCountShader.SetBuffer(kernelId, bufferId, buffer);
+    }
+
+    /// <summary>
+    /// 色集計用のテクスチャをリセット
+    /// </summary>
+    /// <param name="initialize">テクスチャの初期化</param>
+    private void ResetColorCountTexture(bool initialize)
+    {
+        if (initialize && colorCountTexture != null)
+        {
+            // 集計用テクスチャの初期化
+            var tmp = RenderTexture.GetTemporary(colorCountTexture.descriptor);
+            Graphics.Blit(tmp, colorCountTexture);
+            RenderTexture.ReleaseTemporary(tmp);
+        }
+
+        // 集計用シェーダーに値をセット
         colorCountShader.SetTexture(kernelId, "_Source", colorCountTexture);
+    }
+
+    /// <summary>
+    /// ペイントされたテクスチャをリセットする
+    /// </summary>
+    public void Clear(bool recreate = true)
+    {
+        ResetPaintTexture(recreate);
+        ResetComputeBuffer();
+        ResetColorCountTexture(recreate);
     }
 
     /// <summary>

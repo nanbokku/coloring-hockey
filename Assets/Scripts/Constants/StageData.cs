@@ -4,9 +4,11 @@ namespace Constants
 {
     public static class StageData
     {
+        // レイヤー名
         public const string LayerNameOfFloor = "Floor";
         public const string LayerNameOfWall = "Wall";
 
+        // タグ名
         public const string TagNameOfWall = "Wall";
         public const string TagNameOfPuck = "Puck";
         public const string TagNameOfPad = "Pad";

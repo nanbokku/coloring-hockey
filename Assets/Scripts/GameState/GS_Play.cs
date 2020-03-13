@@ -25,23 +25,28 @@ public class GS_Play : GameStateBase
 
         foreach (GoalArea area in goalAreas)
         {
+            // ゴールしたときの処理を登録
             area.OnGoaled = (type) =>
             {
                 puck.SetActive(false);
                 ai.SetActiveOperation(false);
                 player.SetActiveOperation(false);
 
+                // 塗られた色の割合を求め，スコアに適用する
                 float ratio = DynamicPaintManager.Instance.ComputeColorRatio(type);
                 ScoreStore.Instance.IncrementPoint(type, ratio);
             };
         }
 
+        // スコアが更新されたときの処理を登録
         inGameUiController.OnScoreUpdated = () =>
         {
+            // 現在のゲームをリセットする
             if (ScoreStore.Instance.Round < MaxRound)
             {
                 Reset();
             }
+            // 最大ラウンドまでしたら，ゲーム終了
             else
             {
                 isGameFinished = true;
@@ -64,12 +69,18 @@ public class GS_Play : GameStateBase
     {
     }
 
+    /// <summary>
+    /// ゲームを終了する
+    /// </summary>
     private void FinishGame()
     {
         isGameFinished = false;
         OnStateChanged(null);
     }
 
+    /// <summary>
+    /// ゲームをリセットする
+    /// </summary>
     private void Reset()
     {
         if (puck == null)

@@ -8,11 +8,23 @@ public class InGameUIController : MonoBehaviour
     [SerializeField]
     private PlayView playView = null;
 
+    /// <summary>
+    /// カウントダウン終了時に呼ばれるイベント
+    /// </summary>
+    /// <value></value>
     public UnityAction OnCountdownFinished { get; set; } = null;
+    /// <summary>
+    /// スコアが更新されたときのイベント
+    /// </summary>
+    /// <value></value>
     public UnityAction OnScoreUpdated { get; set; } = null;
 
+    /// <summary>
+    /// カウントダウンの表示
+    /// </summary>
     public void CountdownView()
     {
+        // カウントダウンのアニメーションが終了したときの処理
         countdownView.OnStartAnimFinished = () =>
         {
             OnCountdownFinished();
@@ -22,6 +34,9 @@ public class InGameUIController : MonoBehaviour
         playView.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// ゲームプレイ時のUIを表示
+    /// </summary>
     public void PlayView()
     {
         // ScoreStoreが更新されたらviewも更新
@@ -37,6 +52,7 @@ public class InGameUIController : MonoBehaviour
             }
         };
 
+        // UIが更新されたらイベントを発火
         playView.OnScoreUpdated = () =>
         {
             OnScoreUpdated();

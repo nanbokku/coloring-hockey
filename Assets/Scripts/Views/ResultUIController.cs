@@ -18,6 +18,10 @@ public class ResultUIController : MonoBehaviour
     [SerializeField]
     private Button TitleBtn = null;
 
+    /// <summary>
+    /// タイトルボタン押下時のイベント
+    /// </summary>
+    /// <value></value>
     public UnityAction OnTitleBtnClicked { get; set; } = null;
 
     void Start()
@@ -28,6 +32,9 @@ public class ResultUIController : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// 勝った時のビューを表示
+    /// </summary>
     public void Win()
     {
         int score = ScoreStore.Instance.GetScore(PlayerType.Human);
@@ -41,6 +48,9 @@ public class ResultUIController : MonoBehaviour
         loseText.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// 負けたときのビューを表示
+    /// </summary>
     public void Lose()
     {
         int score = ScoreStore.Instance.GetScore(PlayerType.Human);
